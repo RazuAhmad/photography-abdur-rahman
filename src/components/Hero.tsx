@@ -1,9 +1,9 @@
 import { ArrowDown } from "lucide-react";
+import Image, { type StaticImageData } from "next/image";
 import { Button } from "./ui/button";
-import OptimizedImage from "./ui/OptimizedImage";
 
 interface HeroProps {
-  heroImage: string;
+  heroImage: StaticImageData;
 }
 
 const Hero = ({ heroImage }: HeroProps) => {
@@ -11,13 +11,14 @@ const Hero = ({ heroImage }: HeroProps) => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
-        <OptimizedImage
+        <Image
           src={heroImage}
           alt="Photography by Abdur Rahman Razu"
-          className="w-full h-full opacity-40"
-          priority={true} // Hero image should load immediately
-          isFullWidth={true}
-          widths={[640, 750, 828, 1080, 1200, 1920, 2048, 3840]}
+          className="object-cover opacity-40"
+          fill
+          priority
+          placeholder="blur"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
       </div>

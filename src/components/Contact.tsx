@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Mail,
@@ -54,7 +56,7 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 px-6 bg-background">
+    <section id="contact" className="scroll-mt-24 py-24 px-6 bg-background">
       <div className="container mx-auto max-w-6xl">
         {/* Section Header */}
         <div className="text-center mb-16">

@@ -1,73 +1,51 @@
-# Welcome to your Lovable project
+# Abdur Rahman Razu Portfolio
 
-## Project info
+A personal photography and videography portfolio for Abdur Rahman Razu, built with Next.js App Router, React, TypeScript, Tailwind CSS, and shadcn-ui components.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Local Development
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Install dependencies:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Start the development server:
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Build for production:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run build
+```
 
-**Use GitHub Codespaces**
+Run lint checks:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run lint
+```
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+- `src/app/page.tsx` contains the main portfolio page.
+- `src/data/media.ts` contains the photo and video data.
+- `src/components/` contains the hero, gallery, about, contact, navigation, and footer sections.
+- `src/assets/` stores source images used by the React app.
+- `public/` stores static files served from the site root, including the CV and social preview image.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Social Preview
 
-## How can I deploy this project?
+The website link preview uses `public/og-image.jpg`, referenced by the Open Graph and Twitter metadata in `index.html`.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+When replacing the preview image, keep it at `1200x630` for best compatibility with social platforms.
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
+Deploy the production build output from `npm run build` to the hosting provider connected to the public portfolio URL:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```txt
+https://photographer-abdur-rahman-nt5b.vercel.app
+```

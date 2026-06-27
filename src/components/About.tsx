@@ -1,8 +1,8 @@
 import { Camera, Award, Users } from "lucide-react";
-import OptimizedImage from "./ui/OptimizedImage";
+import Image, { type StaticImageData } from "next/image";
 
 interface AboutProps {
-  aboutImage: string;
+  aboutImage: StaticImageData;
 }
 
 const About = ({ aboutImage }: AboutProps) => {
@@ -13,17 +13,19 @@ const About = ({ aboutImage }: AboutProps) => {
   ];
 
   return (
-    <section id="about" className="py-24 px-6 bg-charcoal">
+    <section id="about" className="scroll-mt-24 py-24 px-6 bg-charcoal">
       <div className="container mx-auto max-w-6xl">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image */}
           <div className="relative">
-            <div className="aspect-[3/4] overflow-hidden">
-              <OptimizedImage
+            <div className="relative aspect-[3/4] overflow-hidden">
+              <Image
                 src={aboutImage}
                 alt="Abdur Rahman Razu - Photographer"
-                className="w-full h-full"
-                widths={[320, 640, 768, 1024]}
+                className="object-cover"
+                fill
+                placeholder="blur"
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 w-32 h-32 border-2 border-gold" />

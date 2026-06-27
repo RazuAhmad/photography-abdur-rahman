@@ -1,14 +1,4 @@
-import { lazy, Suspense } from "react";
-import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
-
-// Lazy load the Gallery component since it's image-heavy
-const Gallery = lazy(() => import("@/components/Gallery"));
-
-// Import images
+import type { StaticImageData } from "next/image";
 import heroBg from "@/assets/hero-bg.jpg";
 import aboutPortrait from "@/assets/about-portrait.jpg";
 import gallery1 from "@/assets/gallery-1.jpg";
@@ -24,7 +14,23 @@ import gallery10 from "@/assets/gallery-10.jpg";
 import gallery11 from "@/assets/gallery-11.jpg";
 import gallery12 from "@/assets/gallery-12.jpg";
 
-const photos = [
+export interface Photo {
+  id: number;
+  src: StaticImageData;
+  alt: string;
+  category: string;
+}
+
+export interface Video {
+  id: number;
+  title: string;
+  youtubeId: string;
+  category?: string;
+}
+
+export { aboutPortrait, heroBg };
+
+export const photos: Photo[] = [
   {
     id: 1,
     src: gallery1,
@@ -64,21 +70,23 @@ const photos = [
   { id: 12, src: gallery12, alt: "Golden Childhood", category: "Portrait" },
 ];
 
-const Index = () => {
-  return (
-    <main className="min-h-screen bg-background">
-      <Navigation />
-      <Hero heroImage={heroBg} />
-      <Suspense
-        fallback={<div className="py-24 text-center">Loading gallery...</div>}
-      >
-        <Gallery photos={photos} />
-      </Suspense>
-      <About aboutImage={aboutPortrait} />
-      <Contact />
-      <Footer />
-    </main>
-  );
-};
-
-export default Index;
+export const videos: Video[] = [
+  {
+    id: 1,
+    title: "Documentary Film Reel",
+    youtubeId: "ysz5S6PUM-U",
+    category: "Documentary",
+  },
+  {
+    id: 2,
+    title: "Street Life in Motion",
+    youtubeId: "ScMzIvxBSi4",
+    category: "Street",
+  },
+  {
+    id: 3,
+    title: "Portrait Story",
+    youtubeId: "aqz-KE-bpKQ",
+    category: "Editorial",
+  },
+];
