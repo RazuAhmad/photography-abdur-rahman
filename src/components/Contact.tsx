@@ -126,7 +126,7 @@ const Contact = () => {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="w-full bg-transparent border border-border px-4 py-3 text-foreground focus:border-gold focus:outline-none transition-colors"
-                  placeholder="Osman Hadi"
+                  placeholder="John david"
                 />
               </div>
               <div>
@@ -141,7 +141,7 @@ const Contact = () => {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   className="w-full bg-transparent border border-border px-4 py-3 text-foreground focus:border-gold focus:outline-none transition-colors"
-                  placeholder="hadi247@gmail.com"
+                  placeholder="david247@gmail.com"
                 />
               </div>
             </div>

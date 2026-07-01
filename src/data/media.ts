@@ -21,12 +21,23 @@ export interface Photo {
   category: string;
 }
 
-export interface Video {
+interface BaseVideo {
   id: number;
   title: string;
-  youtubeId: string;
+  url: string;
   category?: string;
 }
+
+export type Video =
+  | (BaseVideo & {
+      provider: "youtube";
+      youtubeId: string;
+    })
+  | (BaseVideo & {
+      provider: "facebook";
+      facebookReelId: string;
+      facebookUrl: string;
+    });
 
 export { aboutPortrait, heroBg };
 
@@ -73,20 +84,44 @@ export const photos: Photo[] = [
 export const videos: Video[] = [
   {
     id: 1,
-    title: "Documentary Film Reel",
-    youtubeId: "ysz5S6PUM-U",
+    provider: "youtube",
+    title: "Documentary Reel I",
+    url: "https://youtu.be/359KKVA3hFU?si=0qMAOXSQdrOUpjRD",
+    youtubeId: "359KKVA3hFU",
     category: "Documentary",
   },
   {
     id: 2,
-    title: "Street Life in Motion",
-    youtubeId: "ScMzIvxBSi4",
-    category: "Street",
+    provider: "youtube",
+    title: "Documentary Reel II",
+    url: "https://youtu.be/F0ru-6_MQpY?si=WOCjpPmf30AoGFwd",
+    youtubeId: "F0ru-6_MQpY",
+    category: "Documentary",
   },
   {
     id: 3,
-    title: "Portrait Story",
-    youtubeId: "aqz-KE-bpKQ",
-    category: "Editorial",
+    provider: "facebook",
+    title: "The Untrained Eye Reel I",
+    url: "https://www.facebook.com/reel/1874750780102092",
+    facebookUrl: "https://www.facebook.com/reel/1874750780102092",
+    facebookReelId: "1874750780102092",
+    category: "Social",
+  },
+  {
+    id: 4,
+    provider: "youtube",
+    title: "Documentary Film Reel",
+    url: "https://youtu.be/2EiMtc5SGcI?si=HZEKioo3roi5NwCU",
+    youtubeId: "2EiMtc5SGcI",
+    category: "Documentary",
+  },
+  {
+    id: 5,
+    provider: "facebook",
+    title: "The Untrained Eye Reel III",
+    url: "https://www.facebook.com/reel/1998788410696568",
+    facebookUrl: "https://www.facebook.com/reel/1998788410696568",
+    facebookReelId: "1998788410696568",
+    category: "Social",
   },
 ];

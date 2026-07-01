@@ -1,5 +1,6 @@
 import { Camera, Award, Users } from "lucide-react";
 import Image, { type StaticImageData } from "next/image";
+import MediaSkeleton from "./MediaSkeleton";
 
 interface AboutProps {
   aboutImage: StaticImageData;
@@ -19,6 +20,7 @@ const About = ({ aboutImage }: AboutProps) => {
           {/* Image */}
           <div className="relative">
             <div className="relative aspect-[3/4] overflow-hidden">
+              <MediaSkeleton className="absolute inset-0" />
               <Image
                 src={aboutImage}
                 alt="Abdur Rahman Razu - Photographer"

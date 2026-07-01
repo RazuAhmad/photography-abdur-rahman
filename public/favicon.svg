@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Abdur Rahman Razu photography favicon">
+  <rect width="512" height="512" rx="96" fill="#101010" />
+  <rect x="112" y="154" width="288" height="224" rx="44" fill="#171717" stroke="#c9a646" stroke-width="24" />
+  <rect x="164" y="120" width="96" height="48" rx="18" fill="#c9a646" />
+  <circle cx="256" cy="266" r="88" fill="#101010" stroke="#c9a646" stroke-width="22" />
+  <path d="M256 184 310 278H202L256 184Z" fill="#c9a646" opacity="0.95" />
+  <path d="M326 226 271 320 217 226H326Z" fill="#8f7330" opacity="0.95" />
+  <circle cx="256" cy="266" r="30" fill="#f3d675" />
+</svg>

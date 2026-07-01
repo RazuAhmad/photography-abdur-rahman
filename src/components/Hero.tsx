@@ -1,5 +1,6 @@
 import { ArrowDown } from "lucide-react";
 import Image, { type StaticImageData } from "next/image";
+import MediaSkeleton from "./MediaSkeleton";
 import { Button } from "./ui/button";
 
 interface HeroProps {
@@ -11,6 +12,7 @@ const Hero = ({ heroImage }: HeroProps) => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
+        <MediaSkeleton className="absolute inset-0" />
         <Image
           src={heroImage}
           alt="Photography by Abdur Rahman Razu"

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play, ExternalLink } from "lucide-react";
 import Image from "next/image";
+import MediaSkeleton from "./MediaSkeleton";
 import type { Photo, Video } from "@/data/media";
 
 interface GalleryProps {
@@ -10,10 +11,40 @@ interface GalleryProps {
   videos: Video[];
 }
 
+const ArchiveLink = ({ href, label }: { href: string; label: string }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-2 border border-gold/50 px-6 py-3 text-xs uppercase tracking-[0.22em] text-gold transition-all duration-300 hover:border-gold hover:bg-gold/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+  >
+    <span>{label}</span>
+    <ExternalLink className="h-4 w-4" aria-hidden="true" />
+  </a>
+);
+
+const getVideoEmbedUrl = (video: Video) => {
+  if (video.provider === "youtube") {
+    return `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0`;
+  }
+
+  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+    video.facebookUrl
+  )}&show_text=false&autoplay=true`;
+};
+
 const Gallery = ({ photos, videos }: GalleryProps) => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeFilter, setActiveFilter] = useState("All");
+  const [loadedPhotoIds, setLoadedPhotoIds] = useState<Set<number>>(
+    () => new Set()
+  );
+  const [loadedVideoIds, setLoadedVideoIds] = useState<Set<number>>(
+    () => new Set()
+  );
+  const [isModalPhotoLoaded, setIsModalPhotoLoaded] = useState(false);
+  const [isModalVideoLoaded, setIsModalVideoLoaded] = useState(false);
   const hasOpenModal = Boolean(selectedPhoto || selectedVideo);
 
   const categories = ["All", ...new Set(photos.map((p) => p.category))];
@@ -26,6 +57,26 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
   const closeModal = useCallback(() => {
     setSelectedPhoto(null);
     setSelectedVideo(null);
+    setIsModalPhotoLoaded(false);
+    setIsModalVideoLoaded(false);
+  }, []);
+
+  const markPhotoLoaded = useCallback((photoId: number) => {
+    setLoadedPhotoIds((currentIds) => {
+      if (currentIds.has(photoId)) return currentIds;
+      const nextIds = new Set(currentIds);
+      nextIds.add(photoId);
+      return nextIds;
+    });
+  }, []);
+
+  const markVideoLoaded = useCallback((videoId: number) => {
+    setLoadedVideoIds((currentIds) => {
+      if (currentIds.has(videoId)) return currentIds;
+      const nextIds = new Set(currentIds);
+      nextIds.add(videoId);
+      return nextIds;
+    });
   }, []);
 
   useEffect(() => {
@@ -48,12 +99,24 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
     };
   }, [closeModal, hasOpenModal]);
 
+  useEffect(() => {
+    videos.forEach((video) => {
+      if (video.provider === "facebook") {
+        markVideoLoaded(video.id);
+      }
+    });
+  }, [markVideoLoaded, videos]);
+
   const openPhotoModal = (photo: Photo) => {
+    setIsModalPhotoLoaded(false);
+    setIsModalVideoLoaded(false);
     setSelectedPhoto(photo);
     setSelectedVideo(null);
   };
 
   const openVideoModal = (video: Video) => {
+    setIsModalPhotoLoaded(false);
+    setIsModalVideoLoaded(false);
     setSelectedVideo(video);
     setSelectedPhoto(null);
   };
@@ -67,6 +130,7 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
       direction === "next"
         ? (currentIndex + 1) % filteredPhotos.length
         : (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+    setIsModalPhotoLoaded(false);
     setSelectedPhoto(filteredPhotos[newIndex]);
   };
 
@@ -113,38 +177,57 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
         {/* Photo Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPhotos.map((photo, index) => (
-            <div
-              key={photo.id}
-              className="group relative aspect-[4/5] overflow-hidden cursor-pointer opacity-0 animate-scale-in"
-              style={{
-                animationDelay: `${index * 0.1}s`,
-                animationFillMode: "forwards",
-              }}
-              onClick={() => openPhotoModal(photo)}
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                fill
-                placeholder="blur"
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              />
-              <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <p className="text-foreground font-display text-lg">
-                    {photo.alt}
-                  </p>
-                  <p className="text-gold text-xs tracking-widest uppercase mt-1">
-                    {photo.category}
-                  </p>
+            (() => {
+              const isPhotoLoaded = loadedPhotoIds.has(photo.id);
+
+              return (
+                <div
+                  key={photo.id}
+                  className="group relative aspect-[4/5] overflow-hidden cursor-pointer opacity-0 animate-scale-in"
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    animationFillMode: "forwards",
+                  }}
+                  onClick={() => openPhotoModal(photo)}
+                  aria-busy={!isPhotoLoaded}
+                >
+                  {!isPhotoLoaded && <MediaSkeleton className="absolute inset-0" />}
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    className={`object-cover transition-all duration-700 group-hover:scale-110 ${
+                      isPhotoLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    fill
+                    placeholder="blur"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    onLoad={() => markPhotoLoaded(photo.id)}
+                    onLoadingComplete={() => markPhotoLoaded(photo.id)}
+                  />
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                    <div>
+                      <p className="text-foreground font-display text-lg">
+                        {photo.alt}
+                      </p>
+                      <p className="text-gold text-xs tracking-widest uppercase mt-1">
+                        {photo.category}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()
           ))}
         </div>
 
-        <div className="mt-24 mb-10 text-center">
+        <div className="mt-10 flex justify-center">
+          <ArchiveLink
+            href="https://www.flickr.com/photos/mohammedabdurrahman"
+            label="See More Photos on Flickr"
+          />
+        </div>
+
+        <div className="mt-20 mb-10 text-center">
           <h3 className="font-display text-3xl font-light text-foreground">
             Videography
           </h3>
@@ -155,41 +238,89 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {videos.map((video) => (
-            <article key={video.id} className="group">
-              <button
-                type="button"
-                onClick={() => openVideoModal(video)}
-                className="block w-full text-left"
-                aria-label={`Play ${video.title}`}
-              >
-                <div className="relative aspect-video overflow-hidden border border-border bg-charcoal shadow-soft transition-colors duration-300 group-hover:border-gold/60">
-                  <Image
-                    src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
-                    alt={video.title}
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/35 transition-colors duration-300 group-hover:bg-background/55">
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/70 bg-background/70 text-gold shadow-soft transition-transform duration-300 group-hover:scale-110">
-                      <Play size={28} fill="currentColor" />
-                    </span>
+            (() => {
+              const isVideoLoaded = loadedVideoIds.has(video.id);
+              const isYouTubeVideo = video.provider === "youtube";
+
+              return (
+                <article key={video.id} className="group">
+                  <button
+                    type="button"
+                    onClick={() => openVideoModal(video)}
+                    className="block w-full text-left"
+                    aria-label={`Play ${video.title}`}
+                  >
+                    <div
+                      className="relative aspect-video overflow-hidden border border-border bg-charcoal shadow-soft transition-colors duration-300 group-hover:border-gold/60"
+                      aria-busy={!isVideoLoaded}
+                    >
+                      {!isVideoLoaded && (
+                        <MediaSkeleton className="absolute inset-0" />
+                      )}
+                      {isYouTubeVideo ? (
+                        <Image
+                          src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+                          alt={video.title}
+                          className={`object-cover transition-all duration-700 group-hover:scale-105 ${
+                            isVideoLoaded ? "opacity-100" : "opacity-0"
+                          }`}
+                          fill
+                          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                          loading="lazy"
+                          onLoad={() => markVideoLoaded(video.id)}
+                          onLoadingComplete={() => markVideoLoaded(video.id)}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--gold)/0.24),transparent_34%),linear-gradient(135deg,hsl(var(--charcoal-light)),hsl(var(--background)))]">
+                          <div className="absolute inset-x-6 top-6 flex items-center justify-between">
+                            <span className="border border-gold/50 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-gold">
+                              Facebook Video
+                            </span>
+                          </div>
+                          <div className="absolute inset-x-6 bottom-6">
+                            <p className="font-display text-2xl font-light text-foreground">
+                              The Untrained Eye
+                            </p>
+                            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold">
+                              Watch Video
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <div
+                        className={`absolute inset-0 flex items-center justify-center bg-background/35 transition-all duration-300 group-hover:bg-background/55 ${
+                          isYouTubeVideo && !isVideoLoaded
+                            ? "opacity-0"
+                            : "opacity-100"
+                        }`}
+                      >
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full border border-gold/70 bg-background/70 text-gold shadow-soft transition-transform duration-300 group-hover:scale-110">
+                          <Play size={28} fill="currentColor" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                  <div className="mt-4 text-left">
+                    <h4 className="font-display text-xl font-light text-foreground">
+                      {video.title}
+                    </h4>
+                    {video.category && (
+                      <p className="mt-1 text-xs uppercase tracking-widest text-gold">
+                        {video.category}
+                      </p>
+                    )}
                   </div>
-                </div>
-              </button>
-              <div className="mt-4 text-left">
-                <h4 className="font-display text-xl font-light text-foreground">
-                  {video.title}
-                </h4>
-                {video.category && (
-                  <p className="mt-1 text-xs uppercase tracking-widest text-gold">
-                    {video.category}
-                  </p>
-                )}
-              </div>
-            </article>
+                </article>
+              );
+            })()
           ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <ArchiveLink
+            href="https://www.facebook.com/theUntrainedEye247"
+            label="See More Videos on Facebook"
+          />
         </div>
 
         {/* Media Modal */}
@@ -223,15 +354,32 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
                   className="flex max-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col items-center gap-4"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Image
-                    src={selectedPhoto.src}
-                    alt={selectedPhoto.alt}
-                    className="max-h-[calc(100vh-11rem)] max-w-full object-contain"
-                    width={selectedPhoto.src.width}
-                    height={selectedPhoto.src.height}
-                    placeholder="blur"
-                    sizes="90vw"
-                  />
+                  <div
+                    className="relative overflow-hidden"
+                    style={{
+                      aspectRatio: `${selectedPhoto.src.width} / ${selectedPhoto.src.height}`,
+                      width: `min(90vw, calc((100vh - 11rem) * ${
+                        selectedPhoto.src.width / selectedPhoto.src.height
+                      }), 72rem)`,
+                    }}
+                    aria-busy={!isModalPhotoLoaded}
+                  >
+                    {!isModalPhotoLoaded && (
+                      <MediaSkeleton className="absolute inset-0" />
+                    )}
+                    <Image
+                      src={selectedPhoto.src}
+                      alt={selectedPhoto.alt}
+                      className={`object-contain transition-opacity duration-500 ${
+                        isModalPhotoLoaded ? "opacity-100" : "opacity-0"
+                      }`}
+                      fill
+                      placeholder="blur"
+                      sizes="90vw"
+                      onLoad={() => setIsModalPhotoLoaded(true)}
+                      onLoadingComplete={() => setIsModalPhotoLoaded(true)}
+                    />
+                  </div>
                   <div className="text-center">
                     <p className="text-foreground font-display text-xl">
                       {selectedPhoto.alt}
@@ -260,13 +408,23 @@ const Gallery = ({ photos, videos }: GalleryProps) => {
                 className="w-full max-w-5xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="aspect-video overflow-hidden border border-border bg-charcoal shadow-soft">
+                <div
+                  className="relative aspect-video w-full overflow-hidden border border-border bg-charcoal shadow-soft"
+                  aria-busy={!isModalVideoLoaded}
+                >
+                  {!isModalVideoLoaded && (
+                    <MediaSkeleton className="absolute inset-0" />
+                  )}
                   <iframe
-                    src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1&rel=0`}
+                    key={selectedVideo.id}
+                    src={getVideoEmbedUrl(selectedVideo)}
                     title={selectedVideo.title}
-                    className="h-full w-full"
+                    className={`h-full w-full transition-opacity duration-500 ${
+                      isModalVideoLoaded ? "opacity-100" : "opacity-0"
+                    }`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
+                    onLoad={() => setIsModalVideoLoaded(true)}
                   />
                 </div>
                 <div className="mt-5 text-center">
